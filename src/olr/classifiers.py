@@ -30,7 +30,7 @@ class custom_estimator(BaseEstimator, ClassifierMixin):
         self.lrn.fit(X, y, sample_weight)
 
         self.classes_ = self.lrn.classes_
-        self.trb.fit(X, y, self.lrn)
+        self.trb.fit(y, self.lrn.predict_proba(X))
 
         return self
 

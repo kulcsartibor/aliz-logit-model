@@ -1,13 +1,34 @@
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import GridSearchCV
+
+
+def calculate_split_gini(y, p, thr):
+    y_left_i = p[:, 0] < thr
+    y_right_i = np.logical_not(y_left_i)
+
+    gini_l = calculate_gini(y[y_left_i])
+    gini_r = calculate_gini(y[y_right_i])
+
+    return gini_l + gini_r
+
+
+def calculate_gini(y):
+    uniqueValues, occurCount = np.unique(y, return_counts=True)
+
+    n_sample = y.size
+
+    gini = 0
+
+    for i in np.nditer(occurCount):
+        gini += (i/n_sample) * (1 - i/n_sample)
+
+    return gini
 
 
 class ThresholdBinarizer(BaseEstimator, TransformerMixin):
 
-    def __init__(self, lrn:LogisticRegression):
-        self.lrn = lrn
+    def __init__(self, resolution=0.01):
+        self.resulotion = resolution
         # print("Initializing classifier:\n
         # args, _, _, values = inspect.getargvalues(inspect.currentframe())
         # values.pop("self")
@@ -15,25 +36,30 @@ class ThresholdBinarizer(BaseEstimator, TransformerMixin):
         # for arg, val in values.items():
         #     setattr(self, arg, val)
 
-    def fit(self, X, y):
+    def fit(self, y, y_p):
 
-        gs = GridSearchCV()
+        threshold = np.arange(self.resulotion, 1, self.resulotion)
+
+        calculate_split_gini(y, y_p, 0.7)
+
 
         self.trh = 0.6
 
         return self
 
-    def transform(self, X):
-        cond = X > self.trh
+    def transform(self, y):
+        cond = y > self.trh
         not_cond = np.logical_not(cond)
-        X[cond] = 1
-        X[not_cond] = 0
+        y[cond] = 1
+        y[not_cond] = 0
 
-        return X
+        return y
 
     def _meaning(self, x):
         # returns True/False according to fitted classifier
         # notice underscore on the beginning
         return True if x >= self.trh else False
+
+
 
 
