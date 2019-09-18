@@ -1,3 +1,4 @@
+import random
 import sys
 
 from sklearn.linear_model import LogisticRegression
@@ -114,6 +115,9 @@ def plot_roc(X,y, list_par_1, par_1 = 'C', par_2 = 1):
 
 
 if __name__ == "__main__":
+    random.seed(a=None, version=2)
+    np.random.seed(seed=0)
+
     df = pd.read_csv("../input/creditcard.csv")
     print(df.head(3))
 
@@ -137,6 +141,8 @@ if __name__ == "__main__":
 
     lrn.fit(X_train, y_train)
     y_pred = lrn.predict(X_test)
+
+    print
 
     cm = confusion_matrix(y_test, y_pred)
     if lrn.classes_[0] == 1:

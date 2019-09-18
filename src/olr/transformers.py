@@ -6,8 +6,8 @@ def calculate_split_gini(y, p, thr):
     y_left_i = p[:, 0] < thr
     y_right_i = np.logical_not(y_left_i)
 
-    gini_l = calculate_gini(y[y_left_i])
-    gini_r = calculate_gini(y[y_right_i])
+    gini_l = calculate_gini(y[y_left_i]) * np.sum(y_left_i) / (p.size)
+    gini_r = calculate_gini(y[y_right_i]) * np.sum(y_right_i) / (p.size)
 
     return gini_l + gini_r
 
@@ -29,6 +29,7 @@ class ThresholdBinarizer(BaseEstimator, TransformerMixin):
 
     def __init__(self, resolution=0.01):
         self.resulotion = resolution
+        self.threshold = -1
         # print("Initializing classifier:\n
         # args, _, _, values = inspect.getargvalues(inspect.currentframe())
         # values.pop("self")
@@ -37,18 +38,22 @@ class ThresholdBinarizer(BaseEstimator, TransformerMixin):
         #     setattr(self, arg, val)
 
     def fit(self, y, y_p):
+        thr_range = np.arange(self.resulotion, 1, self.resulotion)
 
-        threshold = np.arange(self.resulotion, 1, self.resulotion)
+        gini = float('inf')
 
-        calculate_split_gini(y, y_p, 0.7)
+        for t in np.nditer(thr_range):
+            new_gini = calculate_split_gini(y, y_p, t)
+            if new_gini < gini:
+                gini = new_gini
+                self.threshold = t
 
-
-        self.trh = 0.6
+        print("The deducted threshols is: " + str(self.threshold))
 
         return self
 
     def transform(self, y):
-        cond = y > self.trh
+        cond = y > self.threshold
         not_cond = np.logical_not(cond)
         y[cond] = 1
         y[not_cond] = 0
@@ -58,7 +63,7 @@ class ThresholdBinarizer(BaseEstimator, TransformerMixin):
     def _meaning(self, x):
         # returns True/False according to fitted classifier
         # notice underscore on the beginning
-        return True if x >= self.trh else False
+        return True if x >= self.threshold else False
 
 
 
