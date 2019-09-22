@@ -8,7 +8,20 @@ __all__ = ['custom_estimator']
 
 
 class custom_estimator(BaseEstimator, ClassifierMixin):
-    """An example of classifier"""
+    """The custom_estimator is en extension of the base
+    LogisticRegression
+
+    The custom_estimator has an embedded logistic regression model
+    and a ThresholdBinarizer. When the model is being fit, the
+    threshold for binary classification is selected
+    which minimizes the GINI impurity
+
+    Notes:
+    ------
+    The Estimator ha the same base signature as LogisticRegression
+    with and addition output transformer.
+
+    """
 
     def __init__(self, penalty='l2', dual=False, tol=1e-4, C=1.0,
                  fit_intercept=True, intercept_scaling=1, class_weight=None,
@@ -27,6 +40,32 @@ class custom_estimator(BaseEstimator, ClassifierMixin):
             self.trb = output_transformer
 
     def fit(self, X, y, sample_weight=None):
+        """Fit the model according to the given training data.
+
+                Parameters
+                ----------
+                X : {array-like, sparse matrix}, shape (n_samples, n_features)
+                    Training vector, where n_samples is the number of samples and
+                    n_features is the number of features.
+
+                y : array-like, shape (n_samples,)
+                    Target vector relative to X.
+
+                sample_weight : array-like, shape (n_samples,) optional
+                    Array of weights that are assigned to individual samples.
+                    If not provided, then each sample is given unit weight.
+
+                    .. versionadded:: 0.17
+                       *sample_weight* support to LogisticRegression.
+
+                Returns
+                -------
+                self : object
+
+                Notes
+                -----
+                The SAGA solver supports both float64 and float32 bit arrays.
+        """
         self.lrn.fit(X, y, sample_weight)
 
         self.classes_ = self.lrn.classes_
